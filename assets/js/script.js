@@ -3,7 +3,7 @@ const API_URL = "https://ci-jshint.herokuapp.com/api";
 const resultsModal = new bootstrap.Modal(document.getElementById("resultsModal"));
 
 document.getElementById("status").addEventListener("click", e => getStatus(e));
-document.getElementById("submit").addEventListener("click", e => postForm(e))
+document.getElementById("submit").addEventListener("click", e => postForm(e));
 
 function processOptions(form) {
     let optArray = [];
@@ -19,7 +19,7 @@ function processOptions(form) {
     form.append("options", optArray.join());
 
     return form;
-    
+
 }
 
 async function postForm(e) {
@@ -29,13 +29,14 @@ async function postForm(e) {
         method: "POST",
         headers: { "Authorization": API_KEY, },
         body: form,
-    })
+    });
 
     const data = await response.json();
 
     if (response.ok) {
         displayErrors(data);
     } else {
+        displayException(data)
         throw new Error(data.error);
     }
 
@@ -54,6 +55,20 @@ async function getStatus(e) {
         displayApiKeyError(data);
         throw new Error(data.error);
     }
+
+}
+
+function displayException(data) {
+
+    let heading = `<div class="error-heading">An Exception Occurred</div>`;
+
+    results = `<div>The API returned status code ${data.status_code}</div>`;
+    results += `<div>Error number: <strong>${data.error_no}</strong></div>`;
+    results += `<div>Error text: <strong>${data.error}</strong></div>`;
+
+    document.getElementById("resultsModalTitle").innerText = heading;
+    document.getElementById("results-content").innerHTML = results;
+    resultsModal.show();
 
 }
 
@@ -80,16 +95,16 @@ function displayErrors(data) {
 }
 
 function displayStatus(data) {
-    document.getElementById("resultsModalTitle").innerText = "API Key Status:"
-    document.getElementById("results-content").innerHTML = `<div>Your key is valid until: ${data.expiry}</div>`
-    resultsModal.show()
+    document.getElementById("resultsModalTitle").innerText = "API Key Status:";
+    document.getElementById("results-content").innerHTML = `<div>Your key is valid until: ${data.expiry}</div>`;
+    resultsModal.show();
 
 }
 
 function displayApiKeyError(data) {
-    document.getElementById("resultsModalTitle").innerText = "API Key Error:"
-    document.getElementById("results-content").innerHTML = `<div>${data.error}. <br>Please go to:<br>https://ci-jshint.herokuapp.com/ to find out more.</div>`
-    resultsModal.show()
+    document.getElementById("resultsModalTitle").innerText = "API Key Error:";
+    document.getElementById("results-content").innerHTML = `<div>${data.error}. <br>Please go to:<br>https://ci-jshint.herokuapp.com/ to find out more.</div>`;
+    resultsModal.show();
 
 }
 
